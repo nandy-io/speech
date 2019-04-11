@@ -3,3 +3,4 @@ kind: ConfigMap
 metadata:
   namespace: speech-nandy-io
   name: subscriptions
+data: {}
