@@ -9,7 +9,6 @@ spec:
     repo: nandy-io/speech
   manifests:
   - path: kubernetes/namespace.yaml
-  - path: kubernetes/subscriptions.yaml
   - site: github.com
     repo: nandy-io/speech-daemon
     path: kubernetes/daemon.yaml

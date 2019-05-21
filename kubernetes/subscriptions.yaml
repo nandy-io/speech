@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  namespace: speech-nandy-io
-  name: subscriptions
-data: {}
