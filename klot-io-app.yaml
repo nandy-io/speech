@@ -9,7 +9,6 @@ spec:
     repo: nandy-io/speech
   manifests:
   - path: kubernetes/namespace.yaml
-  - path: kubernetes/subscriptions.yaml
   - site: github.com
     repo: nandy-io/speech-daemon
     path: kubernetes/daemon.yaml
@@ -27,29 +26,9 @@ spec:
     description: Which nodes have speakers and you want to speak
     value: enabled
     master: false
-  subscribe:
-  - name: redis
-    source:
-      site: github.com
-      repo: klot-io/redis
-    project:
-      publication: db
-      name: subscriptions
-      namespace: speech-nandy-io
-  publish:
-  - name: gui
-    service:
-      name: www
-      namespace: speech-nandy-io
-      port: http
-    version: "0.1"
+  requires:
+  - site: github.com
+    repo: klot-io/redis
+  url:
     protocol: http
-  - name: api
-    service:
-      name: api
-      namespace: speech-nandy-io
-      port: http
-    version: "0.1"
-    protocol: http
-  url: 
-    publication: gui
+    host: www.speech-nandy-io
