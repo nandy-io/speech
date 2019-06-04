@@ -1,0 +1,47 @@
+{{#def.Header}}
+<div class="uk-overflow-container">
+    <h2>Speak</h2>
+    {{?it.message}}
+    <div class="uk-alert uk-alert-success">
+        {{=it.message}}
+    </div>
+    {{?}}
+    <form class="uk-form uk-form-horizontal">
+        {{~it.fields :field}}
+        <div class="uk-form-row">
+            <label class="uk-form-label" for="{{=field.name}}">{{=field.name}}:</label>
+            {{?field.options}}
+                {{?field.style == "select"}}
+                    <select id="{{!field.name}}" {{?field.trigger}}OnChange="DRApp.current.controller.config_change();"{{?}}>
+                        {{~field.options :option}}
+                            <option value='{{!option}}'>{{= field.labels ? field.labels[option] : option}}</option>
+                        {{~}}
+                    </select>
+                {{??}}
+                    {{~field.options :option}}
+                        <input 
+                            type="radio" name="{{!field.name}}" value="{{!option}}"
+                            {{?(field.value || field.default) == option}}checked{{?}}
+                            {{?field.trigger}}OnClick="DRApp.current.controller.config_change();"{{?}} 
+                        /> 
+                        {{= field.labels ? field.labels[option] : option}}
+                    {{~}}
+                {{?}}
+            {{??}}
+            <input 
+                id="{{!field.name}}" 
+                placeholder="{{!field.label || field.name}}" 
+                value="{{!field.value || field.default || ''}}"
+                {{?field.trigger}}OnInput="DRApp.current.controller.config_change();"{{?}} 
+                type="text"
+            /><br/>
+            {{?}}
+        </div>
+        {{~}}
+        <br/>
+        <button type="button" OnClick="DRApp.current.controller.speak()" class="uk-button uk-button-primary">
+            <i class="uk-icon-volume-up"></i> Speak
+        </button>
+    </form>
+</div>
+{{#def.Footer}}

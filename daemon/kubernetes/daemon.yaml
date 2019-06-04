@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: daemon
+  namespace: speech-nandy-io
+  labels:
+    app: daemon
+spec:
+  selector:
+    matchLabels:
+      app: daemon
+  template:
+    metadata:
+      labels:
+        app: daemon
+    spec:
+      nodeSelector:
+        speech.nandy.io/speakers: enabled
+      containers:
+      - name: daemon
+        image: docker.io/nandyio/speech-daemon:0.1
+        imagePullPolicy: Always
+        env:
+        - name: K8S_NODE
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: REDIS_HOST
+          value: db.redis-klot-io
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_CHANNEL
+          value: nandy.io/speech
+        - name: SPEECH_FILE
+          value: /tmp/speech.mp3
+        - name: SLEEP
+          value: "1"
+        securityContext:
+          privileged: true

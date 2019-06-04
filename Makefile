@@ -1,13 +1,10 @@
-.PHONY: install update reset remove tag
+.PHONY: install remove reset tag
 
 install:
-	kubectl create -f kubernetes/namespace.yaml
-
-update:
-	kubectl replace -f kubernetes/namespace.yaml
+	kubectl create namespace speech-nandy-io
 
 remove:
-	kubectl delete -f kubernetes/namespace.yaml
+	kubectl delete namespace speech-nandy-io
 
 reset: remove install
 
