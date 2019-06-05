@@ -4,10 +4,10 @@ metadata:
   name: speech.nandy.io
   description: Speech - Nandy I/O
 spec:
-  namespace: speech-nandy-io
   source:
     site: github.com
     repo: nandy-io/speech
+  namespace: speech-nandy-io
   manifests:
   - path: daemon/kubernetes/daemon.yaml
   - path: api/kubernetes/account.yaml
