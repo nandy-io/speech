@@ -1,4 +1,4 @@
-.PHONY: install remove reset tag
+.PHONY: install update remove reset tag
 
 install:
 	kubectl create -f kubernetes/namespace.yaml
