@@ -9,6 +9,7 @@ spec:
     repo: nandy-io/speech
   namespace: speech-nandy-io
   manifests:
+  - path: kubernetes/namespace.yaml
   - path: daemon/kubernetes/daemon.yaml
   - path: api/kubernetes/account.yaml
   - path: api/kubernetes/api.yaml
