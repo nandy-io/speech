@@ -33,7 +33,7 @@ DRApp.controller("Base",null,{
     },
     speak: function() {
         var speak = {
-            node: $("#node").val(),
+            node: $('input[name=node]:checked').val(),
             text: $("#text").val(),
             language: $("#language").val(),
         }
