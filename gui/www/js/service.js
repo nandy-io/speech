@@ -33,9 +33,12 @@ DRApp.controller("Base",null,{
     },
     speak: function() {
         var speak = {
-            node: $('input[name=node]:checked').val(),
             text: $("#text").val(),
             language: $("#language").val(),
+        };
+        var node = $('input[name=node]:checked').val();
+        if (node) {
+            speak.node = node;
         }
         this.rest("POST","/api/speak",{speak: speak});
         this.it.message = "text sent for speech";
