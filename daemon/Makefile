@@ -1,7 +1,7 @@
 MACHINE=$(shell uname -m)
 ACCOUNT=nandyio
 IMAGE=speech-daemon
-VERSION?=0.1
+VERSION?=0.2
 VOLUMES=-v ${PWD}/lib/:/opt/nandy-io/lib/ \
 		-v ${PWD}/bin/:/opt/nandy-io/bin/ \
 		-v ${PWD}/test/:/opt/nandy-io/test/
@@ -12,7 +12,7 @@ ENVIRONMENT=-e REDIS_HOST=host.docker.internal \
 .PHONY: build shell test run push install update remove reset
 
 ifeq ($(MACHINE),armv7l)
-DEVICE=--device=/dev/vchiq
+DEVICE=--device=/dev/snd
 endif
 
 build:

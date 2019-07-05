@@ -18,7 +18,7 @@ spec:
         speech.nandy.io/speakers: enabled
       containers:
       - name: daemon
-        image: docker.io/nandyio/speech-daemon:0.1
+        image: docker.io/nandyio/speech-daemon:0.2
         imagePullPolicy: Always
         env:
         - name: K8S_NODE
