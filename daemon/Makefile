@@ -1,18 +1,20 @@
 MACHINE=$(shell uname -m)
 ACCOUNT=nandyio
 IMAGE=speech-daemon
-VERSION?=0.1
+VERSION?=0.2
 VOLUMES=-v ${PWD}/lib/:/opt/nandy-io/lib/ \
 		-v ${PWD}/bin/:/opt/nandy-io/bin/ \
 		-v ${PWD}/test/:/opt/nandy-io/test/
-ENVIRONMENT=-e REDIS_HOST=host.docker.internal \
+ENVIRONMENT=-e K8S_NODE=$(hostname) \
+			-e REDIS_HOST=host.docker.internal \
 			-e REDIS_PORT=6379 \
-			-e REDIS_CHANNEL=nandy.io/speech
-			
+			-e REDIS_CHANNEL=nandy.io/speech \
+			-e SPEECH_FILE=/tmp/speech.mp3 \
+			-e SLEEP=1
 .PHONY: build shell test run push install update remove reset
 
 ifeq ($(MACHINE),armv7l)
-DEVICE=--device=/dev/vchiq
+DEVICE=--device=/dev/snd
 endif
 
 build:

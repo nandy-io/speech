@@ -1,8 +1,6 @@
-FROM resin/rpi-raspbian
+FROM klotio/rpi-raspbian:0.1
 
-RUN apt-get update && apt-get install -y python-pip rpi-update && \
-    SKIP_WARNING=1 rpi-update && \
-    apt-get install -y omxplayer && \
+RUN apt-get update && apt-get install -y alsa-utils mpg123 && \
     mkdir -p /opt/nandy-io
 
 WORKDIR /opt/nandy-io
