@@ -1,6 +1,6 @@
 FROM klotio/rpi-raspbian:0.1
 
-RUN apt-get update && apt-get install -y python-pip alsa-utils && \
+RUN apt-get update && apt-get install -y alsa-utils && \
     mkdir -p /opt/nandy-io
 
 WORKDIR /opt/nandy-io
