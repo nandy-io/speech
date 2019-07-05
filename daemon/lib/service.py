@@ -45,7 +45,7 @@ class Daemon(object):
 
         self.tts = gtts.gTTS(text, lang=language)
         self.tts.save(self.speech_file)
-        os.system("aplay -q %s" % self.speech_file)
+        os.system("mpg123 -q %s" % self.speech_file)
 
     def process(self):
         """

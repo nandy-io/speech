@@ -94,7 +94,7 @@ class TestService(unittest.TestCase):
         self.assertEqual(self.daemon.tts.text, "hey")
         self.assertEqual(self.daemon.tts.lang, "murican")
         self.assertEqual(self.daemon.tts.saved, "blah.mp3")
-        mock_system.assert_called_once_with("aplay -q blah.mp3")
+        mock_system.assert_called_once_with("mpg123 -q blah.mp3")
 
     @mock.patch("gtts.gTTS", MockgTTS)
     @mock.patch("os.system")
@@ -153,7 +153,7 @@ class TestService(unittest.TestCase):
         self.assertEqual(self.daemon.tts.text, "hey")
         self.assertEqual(self.daemon.tts.lang, "murican")
         self.assertEqual(self.daemon.tts.saved, "blah.mp3")
-        mock_system.assert_called_with("aplay -q blah.mp3")
+        mock_system.assert_called_with("mpg123 -q blah.mp3")
         self.assertEqual(mock_print.getvalue().split("\n")[:-1], [
             "whoops",
             "spirograph",

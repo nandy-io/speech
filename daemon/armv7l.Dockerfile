@@ -1,6 +1,6 @@
 FROM klotio/rpi-raspbian:0.1
 
-RUN apt-get update && apt-get install -y alsa-utils && \
+RUN apt-get update && apt-get install -y mpg123 && \
     mkdir -p /opt/nandy-io
 
 WORKDIR /opt/nandy-io
