@@ -2,9 +2,9 @@ MACHINE=$(shell uname -m)
 ACCOUNT=nandyio
 IMAGE=speech-daemon
 VERSION?=0.1
-VOLUMES=-v ${PWD}/lib/:/opt/nandy-io/lib/ \
-		-v ${PWD}/bin/:/opt/nandy-io/bin/ \
-		-v ${PWD}/test/:/opt/nandy-io/test/
+VOLUMES=-v ${PWD}/lib/:/opt/service/lib/ \
+		-v ${PWD}/bin/:/opt/service/bin/ \
+		-v ${PWD}/test/:/opt/service/test/
 ENVIRONMENT=-e K8S_NODE=$(hostname) \
 			-e REDIS_HOST=host.docker.internal \
 			-e REDIS_PORT=6379 \

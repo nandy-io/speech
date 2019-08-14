@@ -3,9 +3,9 @@ IMAGE=speech-api
 VERSION=0.1
 NAME=$(IMAGE)-$(ACCOUNT)
 NETWORK=klot.io
-VOLUMES=-v ${PWD}/lib/:/opt/nandy-io/lib/ \
-		-v ${PWD}/test/:/opt/nandy-io/test/ \
-		-v ${PWD}/bin/:/opt/nandy-io/bin/
+VOLUMES=-v ${PWD}/lib/:/opt/service/lib/ \
+		-v ${PWD}/test/:/opt/service/test/ \
+		-v ${PWD}/bin/:/opt/service/bin/
 ENVIRONMENT=-e REDIS_HOST=redis-klotio \
 			-e REDIS_PORT=6379 \
 			-e REDIS_CHANNEL=nandy.io/speech
