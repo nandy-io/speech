@@ -2,21 +2,20 @@ apiVersion: klot.io/v1
 kind: App
 metadata:
   name: speech.nandy.io
-  version: v0.1
-  description: Speech - Nandy I/O
 spec:
   namespace: speech-nandy-io
+  description: Speech - Nandy I/O
   manifests:
   - path: kubernetes/namespace.yaml
   - path: daemon/kubernetes/daemon.yaml
   - path: api/kubernetes/account.yaml
   - path: api/kubernetes/api.yaml
   - path: gui/kubernetes/gui.yaml
-  labels:
+  settings:
   - name: speakers
     description: Which nodes have speakers and you want to speak
-    value: enabled
-    master: false
+    multi: true
+    node: enabled
   requires:
   - name: redis.klot.io
     source:
