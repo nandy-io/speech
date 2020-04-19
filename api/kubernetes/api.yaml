@@ -15,7 +15,6 @@ spec:
       labels:
         app: api
     spec:
-      serviceAccount: api
       containers:
       - name: api
         image: docker.io/nandyio/speech-api:0.1
@@ -40,6 +39,13 @@ spec:
           httpGet:
             path: /health
             port: 80
+        volumeMounts:
+        - name: config
+          mountPath: /opt/service/config
+      volumes:
+        - name: config
+          configMap:
+            name: config
 ---
 kind: Service
 apiVersion: v1

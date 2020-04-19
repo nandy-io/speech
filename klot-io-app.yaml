@@ -1,5 +1,5 @@
 apiVersion: klot.io/v1
-kind: App
+kind: KlotIOApp
 metadata:
   name: speech.nandy.io
 spec:
@@ -8,7 +8,6 @@ spec:
   manifests:
   - path: kubernetes/namespace.yaml
   - path: daemon/kubernetes/daemon.yaml
-  - path: api/kubernetes/account.yaml
   - path: api/kubernetes/api.yaml
   - path: gui/kubernetes/gui.yaml
   settings:

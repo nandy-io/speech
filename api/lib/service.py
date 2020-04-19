@@ -7,7 +7,6 @@ import redis
 import flask
 import flask_restful
 import opengui
-import pykube
 
 
 def app():
@@ -16,11 +15,6 @@ def app():
 
     app.redis = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=int(os.environ['REDIS_PORT']))
     app.channel = os.environ['REDIS_CHANNEL']
-
-    if os.path.exists("/var/run/secrets/kubernetes.io/serviceaccount/token"):
-        app.kube = pykube.HTTPClient(pykube.KubeConfig.from_service_account())
-    else:
-        app.kube = pykube.HTTPClient(pykube.KubeConfig.from_url("http://host.docker.internal:7580"))
 
     api = flask_restful.Api(app)
 
@@ -95,11 +89,10 @@ class Speak(flask_restful.Resource):
             }
         ])
 
-        for node in pykube.Node.objects(flask.current_app.kube).filter(selector={"speech.nandy.io/speakers": "enabled"}):
-            fields["node"].options.append(node.obj["metadata"]["name"])
-            fields["node"].labels[node.obj["metadata"]["name"]] = node.obj["metadata"]["name"]
-
-        fields["node"].options.sort()
+        with open("/opt/service/config/settings.yaml", "r") as settings_file:
+            for node in yaml.safe_load(settings_file)["speakers"]:
+                fields["node"].options.append(node)
+                fields["node"].labels[node] = node
 
         return fields
 
