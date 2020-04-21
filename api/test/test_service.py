@@ -31,9 +31,6 @@ class TestService(unittest.TestCase):
         "REDIS_CHANNEL": "stuff"
     })
     @unittest.mock.patch("redis.StrictRedis", MockRedis)
-    @unittest.mock.patch("os.path.exists", unittest.mock.MagicMock(return_value=True))
-    @unittest.mock.patch("pykube.HTTPClient", unittest.mock.MagicMock)
-    @unittest.mock.patch("pykube.KubeConfig.from_service_account", unittest.mock.MagicMock)
     def setUp(self):
 
         self.app = service.app()
@@ -45,49 +42,20 @@ class TestService(unittest.TestCase):
         "REDIS_CHANNEL": "stuff"
     })
     @unittest.mock.patch("redis.StrictRedis", MockRedis)
-    @unittest.mock.patch("os.path.exists")
-    @unittest.mock.patch("pykube.KubeConfig.from_file")
-    @unittest.mock.patch("pykube.KubeConfig.from_service_account")
-    @unittest.mock.patch("pykube.KubeConfig.from_url")
-    @unittest.mock.patch("pykube.HTTPClient", unittest.mock.MagicMock)
-    def test_app(self, mock_url, mock_account, mock_file, mock_exists):
+    def test_app(self):
 
-        mock_exists.return_value = True
         app = service.app()
 
         self.assertEqual(app.redis.host, "most.com")
         self.assertEqual(app.redis.port, 667)
         self.assertEqual(app.channel, "stuff")
 
-        mock_exists.assert_called_once_with("/var/run/secrets/kubernetes.io/serviceaccount/token")
-        mock_account.assert_called_once()
-
-        mock_exists.return_value = False
-        app = service.app()
-
-        mock_url.assert_called_once_with("http://host.docker.internal:7580")
-
     def test_health(self):
 
         self.assertEqual(self.api.get("/health").json, {"message": "OK"})
 
-    @unittest.mock.patch("pykube.Node.objects")
     @unittest.mock.patch("service.time.time")
-    def test_Speak(self, mock_time, mock_nodes):
-
-        mock_node_a = unittest.mock.MagicMock()
-        mock_node_a.obj = {
-            "metadata": {
-                "name": "a"
-            }
-        }
-        mock_node_b = unittest.mock.MagicMock()
-        mock_node_b.obj = {
-            "metadata": {
-                "name": "b"
-            }
-        }
-        mock_nodes.return_value.filter.return_value = [mock_node_b, mock_node_a]
+    def test_Speak(self, mock_time):
 
         response = self.api.options("/speak")
         self.assertEqual(response.status_code, 200, response.json)
@@ -137,13 +105,15 @@ class TestService(unittest.TestCase):
                     "name": "node",
                     "options": [
                         "",
-                        "a",
-                        "b"
+                        "people",
+                        "stuff",
+                        "things"
                     ],
                     "labels": {
                         "": "all",
-                        "a": "a",
-                        "b": "b"
+                        "people": "people",
+                        "stuff": "stuff",
+                        "things": "things"
                     },
                     "default": "",
                     "optional": True
@@ -151,10 +121,7 @@ class TestService(unittest.TestCase):
             ]
         })
 
-        mock_nodes.assert_called_once_with(self.app.kube)
-        mock_nodes.return_value.filter.assert_called_once_with(selector={"speech.nandy.io/speakers": "enabled"})
-
-        response = self.api.options("/speak", json={"speak": {"node": "c"}})
+        response = self.api.options("/speak", json={"speak": {"node": "womp"}})
         self.assertEqual(response.status_code, 200, response.json)
         self.assertEqual(response.json, {
             "fields": [
@@ -204,18 +171,20 @@ class TestService(unittest.TestCase):
                     "name": "node",
                     "options": [
                         "",
-                        "a",
-                        "b"
+                        "people",
+                        "stuff",
+                        "things"
                     ],
                     "labels": {
                         "": "all",
-                        "a": "a",
-                        "b": "b"
+                        "people": "people",
+                        "stuff": "stuff",
+                        "things": "things"
                     },
                     "default": "",
                     "optional": True,
-                    "value": "c",
-                    "errors": ["invalid value 'c'"]
+                    "value": "womp",
+                    "errors": ["invalid value 'womp'"]
                 }
             ],
             "errors": []
@@ -225,7 +194,7 @@ class TestService(unittest.TestCase):
         self.assertEqual(response.status_code, 400, response.json)
         self.assertEqual(response.json["errors"], ["missing speak"])
 
-        response = self.api.post("/speak", json={"speak": {"node": "c"}})
+        response = self.api.post("/speak", json={"speak": {"node": "womp"}})
         self.assertEqual(response.status_code, 400, response.json)
         self.assertEqual(response.json, {
             "fields": [
@@ -275,18 +244,20 @@ class TestService(unittest.TestCase):
                     "name": "node",
                     "options": [
                         "",
-                        "a",
-                        "b"
+                        "people",
+                        "stuff",
+                        "things"
                     ],
                     "labels": {
                         "": "all",
-                        "a": "a",
-                        "b": "b"
+                        "people": "people",
+                        "stuff": "stuff",
+                        "things": "things"
                     },
                     "default": "",
                     "optional": True,
-                    "value": "c",
-                    "errors": ["invalid value 'c'"]
+                    "value": "womp",
+                    "errors": ["invalid value 'womp'"]
                 }
             ],
             "errors": []
@@ -319,7 +290,7 @@ class TestService(unittest.TestCase):
             "speak": {
                 "text": "hi",
                 "language": "en-AU",
-                "node": "b"
+                "node": "stuff"
             }
         })
         self.assertEqual(response.status_code, 202, response.json)
@@ -328,7 +299,7 @@ class TestService(unittest.TestCase):
                 "timestamp": 7,
                 "text": "hi",
                 "language": "en-AU",
-                "node": "b"
+                "node": "stuff"
             }
         })
         self.assertEqual(self.app.redis.channel, "stuff")
@@ -336,5 +307,5 @@ class TestService(unittest.TestCase):
             "timestamp": 7,
             "text": "hi",
             "language": "en-AU",
-            "node": "b"
+            "node": "stuff"
         })
