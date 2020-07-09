@@ -22,4 +22,4 @@ spec:
       repo: klot-io/redis
   url:
     protocol: http
-    host: www.speech-nandy-io
+    host: www-speech-nandy-io
