@@ -36,7 +36,7 @@ class Daemon(object):
         """
 
         self.pubsub = self.redis.pubsub()
-        self.pubsub.subscribe(self.channel) 
+        self.pubsub.subscribe(self.channel)
 
     def speak(self, text, language):
         """
@@ -59,9 +59,9 @@ class Daemon(object):
 
         data = json.loads(message['data'])
 
-        if "node" not in data or data["node"] == self.node:
+        if data.get("node") in ["*", self.node]:
             self.speak(data["text"], data.get("language", "en"))
-            
+
     def run(self):
         """
         Runs the daemon

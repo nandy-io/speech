@@ -79,10 +79,10 @@ class Speak(flask_restful.Resource):
             {
                 "name": "node",
                 "options": [
-                    ""
+                    "*"
                 ],
                 "labels": {
-                    "": "all"
+                    "*": "all"
                 },
                 "default": "",
                 "optional": True

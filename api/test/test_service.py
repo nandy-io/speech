@@ -104,13 +104,13 @@ class TestService(unittest.TestCase):
                 {
                     "name": "node",
                     "options": [
-                        "",
+                        "*",
                         "people",
                         "stuff",
                         "things"
                     ],
                     "labels": {
-                        "": "all",
+                        "*": "all",
                         "people": "people",
                         "stuff": "stuff",
                         "things": "things"
@@ -170,13 +170,13 @@ class TestService(unittest.TestCase):
                 {
                     "name": "node",
                     "options": [
-                        "",
+                        "*",
                         "people",
                         "stuff",
                         "things"
                     ],
                     "labels": {
-                        "": "all",
+                        "*": "all",
                         "people": "people",
                         "stuff": "stuff",
                         "things": "things"
@@ -243,13 +243,13 @@ class TestService(unittest.TestCase):
                 {
                     "name": "node",
                     "options": [
-                        "",
+                        "*",
                         "people",
                         "stuff",
                         "things"
                     ],
                     "labels": {
-                        "": "all",
+                        "*": "all",
                         "people": "people",
                         "stuff": "stuff",
                         "things": "things"
