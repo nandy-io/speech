@@ -106,18 +106,20 @@ class TestService(unittest.TestCase):
             {
                 "data": json.dumps({
                     "timestamp": 7,
-                    "text": "hey"
+                    "text": "hey",
+                    "node": "noisy"
                 })
             },
             {
                 "data": json.dumps({
                     "timestamp": 7,
                     "text": "hey",
-                    "language": "murican"
+                    "language": "murican",
+                    "node": "*"
                 })
             }
         ]
-        
+
         self.daemon.process()
         self.assertEqual(self.daemon.tts.text, "hey")
         self.assertEqual(self.daemon.tts.lang, "en")
@@ -138,7 +140,8 @@ class TestService(unittest.TestCase):
                 "data": json.dumps({
                     "timestamp": 7,
                     "text": "hey",
-                    "language": "murican"
+                    "language": "murican",
+                    "node": "noisy"
                 })
             },
             None,

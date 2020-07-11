@@ -1,7 +1,7 @@
 MACHINE=$(shell uname -m)
 ACCOUNT=nandyio
 IMAGE=speech-daemon
-VERSION?=0.1
+VERSION?=0.2
 VOLUMES=-v ${PWD}/lib/:/opt/service/lib/ \
 		-v ${PWD}/bin/:/opt/service/bin/ \
 		-v ${PWD}/test/:/opt/service/test/
