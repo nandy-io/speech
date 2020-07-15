@@ -309,3 +309,66 @@ class TestService(unittest.TestCase):
             "language": "en-AU",
             "node": "stuff"
         })
+
+    def test_Integrate(self):
+
+        response = self.api.options("/integrate")
+        self.assertEqual(response.status_code, 200, response.json)
+        self.assertEqual(response.json, {
+            "fields": [
+                {
+                    "name": "language",
+                    "options": [
+                        "en-AU",
+                        "en-CA",
+                        "en-GH",
+                        "en-GB",
+                        "en-IN",
+                        "en-IE",
+                        "en-KE",
+                        "en-NZ",
+                        "en-NG",
+                        "en-PH",
+                        "en-SG",
+                        "en-ZA",
+                        "en-TZ",
+                        "en-US"
+                    ],
+                    "labels": {
+                        "en-AU": "English (Australia)",
+                        "en-CA": "English (Canada)",
+                        "en-GH": "English (Ghana)",
+                        "en-GB": "English (United Kingdom)",
+                        "en-IN": "English (India)",
+                        "en-IE": "English (Ireland)",
+                        "en-KE": "English (Kenya)",
+                        "en-NZ": "English (New Zealand)",
+                        "en-NG": "English (Nigeria)",
+                        "en-PH": "English (Philippines)",
+                        "en-SG": "English (Singapore)",
+                        "en-ZA": "English (South Africa)",
+                        "en-TZ": "English (Tanzania)",
+                        "en-US": "English (United States)"
+                    },
+                    "default": "en-US",
+                    "style": "select"
+                },
+                {
+                    "name": "node",
+                    "options": [
+                        "*",
+                        "people",
+                        "stuff",
+                        "things"
+                    ],
+                    "labels": {
+                        "*": "all",
+                        "people": "people",
+                        "stuff": "stuff",
+                        "things": "things"
+                    },
+                    "default": "",
+                    "optional": True
+                }
+            ]
+        })

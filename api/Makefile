@@ -1,6 +1,6 @@
 ACCOUNT=nandyio
 IMAGE=speech-api
-VERSION=0.3
+VERSION=0.4
 NAME=$(IMAGE)-$(ACCOUNT)
 NETWORK=klot.io
 VOLUMES=-v ${PWD}/lib/:/opt/service/lib/ \
