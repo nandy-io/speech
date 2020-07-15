@@ -20,6 +20,7 @@ def app():
 
     api.add_resource(Health, '/health')
     api.add_resource(Speak, '/speak')
+    api.add_resource(Integrate, '/integrate')
 
     return app
 
@@ -33,7 +34,8 @@ class Speak(flask_restful.Resource):
 
     name = "speak"
 
-    def fields(self, values=None):
+    @staticmethod
+    def fields(values=None):
 
         fields = opengui.Fields(values, fields=[
             {
@@ -74,7 +76,8 @@ class Speak(flask_restful.Resource):
                     "en-US": "English (United States)"
                 },
                 "default": "en-US",
-                "style": "select"
+                "style": "select",
+                "optional": True
             },
             {
                 "name": "node",
@@ -129,3 +132,9 @@ class Speak(flask_restful.Resource):
         flask.current_app.redis.publish(flask.current_app.channel, json.dumps(message))
 
         return {"message": message}, 202
+
+class Integrate(flask_restful.Resource):
+
+    def options(self):
+
+        return {"fields": Speak.fields().to_list()[1:]}
