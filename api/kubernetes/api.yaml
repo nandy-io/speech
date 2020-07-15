@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: docker.io/nandyio/speech-api:0.3
+        image: docker.io/nandyio/speech-api:0.4
         imagePullPolicy: Always
         env:
         - name: REDIS_HOST
