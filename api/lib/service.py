@@ -76,7 +76,8 @@ class Speak(flask_restful.Resource):
                     "en-US": "English (United States)"
                 },
                 "default": "en-US",
-                "style": "select"
+                "style": "select",
+                "optional": True
             },
             {
                 "name": "node",

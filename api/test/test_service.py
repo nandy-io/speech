@@ -99,7 +99,8 @@ class TestService(unittest.TestCase):
                         "en-US": "English (United States)"
                     },
                     "default": "en-US",
-                    "style": "select"
+                    "style": "select",
+                    "optional": True
                 },
                 {
                     "name": "node",
@@ -165,6 +166,7 @@ class TestService(unittest.TestCase):
                     },
                     "default": "en-US",
                     "style": "select",
+                    "optional": True,
                     "value": "en-US"
                 },
                 {
@@ -238,6 +240,7 @@ class TestService(unittest.TestCase):
                     },
                     "default": "en-US",
                     "style": "select",
+                    "optional": True,
                     "value": "en-US"
                 },
                 {
@@ -351,7 +354,8 @@ class TestService(unittest.TestCase):
                         "en-US": "English (United States)"
                     },
                     "default": "en-US",
-                    "style": "select"
+                    "style": "select",
+                    "optional": True
                 },
                 {
                     "name": "node",
