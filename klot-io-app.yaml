@@ -6,7 +6,6 @@ spec:
   namespace: speech-nandy-io
   description: Speech - Nandy I/O
   manifests:
-  - path: kubernetes/namespace.yaml
   - path: daemon/kubernetes/daemon.yaml
   - path: api/kubernetes/api.yaml
   - path: gui/kubernetes/gui.yaml
