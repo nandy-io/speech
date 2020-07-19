@@ -5,5 +5,10 @@
             <li {{? DRApp.current.paths[0] == '' }}class="uk-active"{{?}}>
                 <a href="{{=DRApp.link('home')}}">Speak</a>
             </li>
+{{~DRApp.group.members :member}}
+            <li>
+                <a href="{{!member.url}}">{{=member.name}}</a>
+            </li>
+{{~}}
         </ul>
     </nav>

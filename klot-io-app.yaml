@@ -4,7 +4,9 @@ metadata:
   name: speech.nandy.io
 spec:
   namespace: speech-nandy-io
-  description: Speech - Nandy I/O
+  group: Nandy I/O
+  member: Speech
+  description: Allows nodes to speak text in a specific accent
   manifests:
   - path: daemon/kubernetes/daemon.yaml
   - path: api/kubernetes/api.yaml

@@ -2,5 +2,6 @@ flask==1.0.2
 flask_restful==0.3.7
 PyYAML==5.1
 redis==2.10.6
+requests==2.22
 git+https://github.com/gaf3/opengui.git@v0.2#egg=opengui
 coverage==4.5.1
