@@ -9,7 +9,9 @@ VOLUMES=-v ${PWD}/lib/:/opt/service/lib/ \
 		-v ${PWD}/config/:/opt/service/config/
 ENVIRONMENT=-e REDIS_HOST=redis-klotio \
 			-e REDIS_PORT=6379 \
-			-e REDIS_CHANNEL=nandy.io/speech
+			-e REDIS_CHANNEL=nandy.io/speech \
+			-e NODE_NAME=roam-klot-io.local \
+			-e PYTHONUNBUFFERED=1
 PORT=8365
 
 .PHONY: cross build network shell test run start stop push install update remove reset

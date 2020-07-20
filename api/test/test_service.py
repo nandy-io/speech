@@ -54,6 +54,28 @@ class TestService(unittest.TestCase):
 
         self.assertEqual(self.api.get("/health").json, {"message": "OK"})
 
+    @unittest.mock.patch.dict(os.environ, {
+        "NODE_NAME": "barry"
+    })
+    @unittest.mock.patch("requests.get")
+    def test_group(self, mock_get):
+
+        mock_get.return_value.json.return_value = [{
+            "name": "unit",
+            "url": "test"
+        }]
+
+        self.assertEqual(self.api.get("/group").json, {"group": [{
+            "name": "unit",
+            "url": "test"
+        }]})
+
+        mock_get.assert_has_calls([
+            unittest.mock.call("http://barry:8083/app/speech.nandy.io/member"),
+            unittest.mock.call().raise_for_status(),
+            unittest.mock.call().json()
+        ])
+
     @unittest.mock.patch("service.time.time")
     def test_Speak(self, mock_time):
 

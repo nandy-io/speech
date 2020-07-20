@@ -7,6 +7,7 @@ import redis
 import flask
 import flask_restful
 import opengui
+import requests
 
 
 def app():
@@ -19,6 +20,7 @@ def app():
     api = flask_restful.Api(app)
 
     api.add_resource(Health, '/health')
+    api.add_resource(Group, '/group')
     api.add_resource(Speak, '/speak')
     api.add_resource(Integrate, '/integrate')
 
@@ -28,6 +30,15 @@ def app():
 class Health(flask_restful.Resource):
     def get(self):
         return {"message": "OK"}
+
+
+class Group(flask_restful.Resource):
+    def get(self):
+        response = requests.get(f"http://{os.environ['NODE_NAME']}:8083/app/speech.nandy.io/member")
+
+        response.raise_for_status()
+
+        return {"group": response.json()}
 
 
 class Speak(flask_restful.Resource):
