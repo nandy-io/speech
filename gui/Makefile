@@ -1,4 +1,3 @@
-MACHINE=$(shell uname -m)
 ACCOUNT=nandyio
 IMAGE=speech-gui
 VERSION=0.3
@@ -7,12 +6,6 @@ NETWORK=klot.io
 VOLUMES=-v ${PWD}/www/:/opt/service/www/ \
 		-v ${PWD}/etc/docker.conf:/etc/nginx/conf.d/default.conf
 PORT=8371
-
-ifeq ($(MACHINE),armv7l)
-BASE=arm32v7/nginx
-else
-BASE=nginx:1.15.7-alpine
-endif
 
 .PHONY: cross build network shell run start stop push install update remove reset
 
@@ -38,11 +31,7 @@ stop:
 	docker rm -f $(NAME)
 
 push:
-ifeq ($(MACHINE),armv7l)
 	docker push $(ACCOUNT)/$(IMAGE):$(VERSION)
-else
-	echo "Only push armv7l"
-endif
 
 install:
 	kubectl create -f kubernetes/gui.yaml
