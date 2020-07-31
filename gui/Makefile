@@ -1,8 +1,6 @@
 ACCOUNT=nandyio
 IMAGE=speech-gui
 VERSION=0.3
-NAME=$(IMAGE)-$(ACCOUNT)
-PORT=8371
 
 .PHONY: cross build shell push install update remove reset
 
@@ -13,7 +11,7 @@ build:
 	docker build . --build-arg BASE=$(BASE) -t $(ACCOUNT)/$(IMAGE):$(VERSION)
 
 shell:
-	-docker run -it --rm --name=$(NAME) $(ACCOUNT)/$(IMAGE):$(VERSION) sh
+	-docker run -it --rm $(ACCOUNT)/$(IMAGE):$(VERSION) sh
 
 push:
 	docker push $(ACCOUNT)/$(IMAGE):$(VERSION)
