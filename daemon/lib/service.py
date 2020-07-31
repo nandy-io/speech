@@ -19,7 +19,7 @@ class Daemon(object):
 
     def __init__(self):
 
-        self.node = os.environ['K8S_NODE']
+        self.node = os.environ['NODE_NAME']
 
         self.speech_file = os.environ['SPEECH_FILE']
         self.sleep = int(os.environ['SLEEP'])

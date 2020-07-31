@@ -1,5 +1,5 @@
 import unittest
-import mock
+import unittest.mock
 
 import os
 import json
@@ -45,7 +45,7 @@ class MockgTTS(object):
 class TestService(unittest.TestCase):
 
     @mock.patch.dict(os.environ, {
-        "K8S_NODE": "noisy",
+        "NODE_NAME": "noisy",
         "REDIS_HOST": "most.com",
         "REDIS_PORT": "667",
         "REDIS_CHANNEL": "stuff",
@@ -58,7 +58,7 @@ class TestService(unittest.TestCase):
         self.daemon = service.Daemon()
 
     @mock.patch.dict(os.environ, {
-        "K8S_NODE": "noisy",
+        "NODE_NAME": "noisy",
         "REDIS_HOST": "most.com",
         "REDIS_PORT": "667",
         "REDIS_CHANNEL": "stuff",

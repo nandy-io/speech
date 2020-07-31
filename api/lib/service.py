@@ -34,7 +34,7 @@ class Health(flask_restful.Resource):
 
 class Group(flask_restful.Resource):
     def get(self):
-        response = requests.get(f"http://{os.environ['NODE_NAME']}:8083/app/speech.nandy.io/member")
+        response = requests.get(f"http://api.klot-io/app/speech.nandy.io/member")
 
         response.raise_for_status()
 
@@ -106,7 +106,7 @@ class Speak(flask_restful.Resource):
         with open("/opt/service/config/settings.yaml", "r") as settings_file:
             for node in yaml.safe_load(settings_file)["speakers"]:
                 fields["node"].options.append(node)
-                fields["node"].labels[node] = node
+                fields["node"].content["labels"][node] = node
 
         return fields
 

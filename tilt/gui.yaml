@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gui
+  namespace: speech-nandy-io
+spec:
+  template:
+    spec:
+      containers:
+      - name: gui
+        image: gui-speech-nandy-io
+        imagePullPolicy: Never
+        readinessProbe:
+          initialDelaySeconds: 20
+        livenessProbe:
+          initialDelaySeconds: 20
