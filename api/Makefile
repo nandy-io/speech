@@ -7,7 +7,7 @@ VOLUMES=-v ${PWD}/lib/:/opt/service/lib/ \
 		-v ${PWD}/test/:/opt/service/test/
 ENVIRONMENT=-e PYTHONDONTWRITEBYTECODE=1 \
 			-e PYTHONUNBUFFERED=1
-DEBUG_PORT=18348
+DEBUG_PORT=16551
 
 .PHONY: cross build shell debug test push install update remove reset
 

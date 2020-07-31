@@ -6,14 +6,14 @@
             "name": "gui",
             "type": "chrome",
             "request": "launch",
-            "url": "http://localhost:8380/",
+            "url": "http://localhost:6583/",
             "webRoot": "${workspaceFolder}/gui/www"
         },
         {
             "name": "api",
             "type": "python",
             "request": "attach",
-            "port": 18348,
+            "port": 16551,
             "host": "localhost",
             "pathMappings": [
                 {
@@ -26,7 +26,7 @@
             "name": "daemon",
             "type": "python",
             "request": "attach",
-            "port": 28348,
+            "port": 26551,
             "host": "localhost",
             "pathMappings": [
                 {
