@@ -1,9 +1,5 @@
 FROM klotio/flask:0.1
 
-RUN mkdir -p /opt/service
-
-WORKDIR /opt/service
-
 COPY requirements.txt .
 
 RUN apk add --no-cache --virtual .pip-deps  \
