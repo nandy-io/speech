@@ -4,7 +4,6 @@ Main module for daemon
 
 import os
 import time
-import traceback
 
 import json
 import yaml
@@ -70,9 +69,5 @@ class Daemon(object):
         self.subscribe()
 
         while True:
-            try:
-                self.process()
-                time.sleep(self.sleep)
-            except Exception as exception:
-                print(exception)
-                print(traceback.format_exc())
+            self.process()
+            time.sleep(self.sleep)
