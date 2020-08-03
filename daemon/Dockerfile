@@ -1,9 +1,12 @@
-FROM klotio/flask:0.1
+FROM klotio/python:0.1
 
 COPY requirements.txt .
 
 RUN apk add --no-cache --virtual .pip-deps  \
-        git \
+        gcc \
+        libc-dev \
+        make \
+    && apk add --no-cache alsa-utils mpg123 \
     && pip install --no-cache-dir -r requirements.txt \
     && apk del --no-network .pip-deps \
 	&& find /usr/local -depth \
@@ -18,4 +21,4 @@ COPY lib lib
 
 ENV PYTHONPATH "/opt/service/lib:${PYTHONPATH}"
 
-CMD "/opt/service/bin/api.py"
+CMD "/opt/service/bin/daemon.py"

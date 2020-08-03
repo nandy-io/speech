@@ -54,9 +54,6 @@ class TestService(unittest.TestCase):
 
         self.assertEqual(self.api.get("/health").json, {"message": "OK"})
 
-    @unittest.mock.patch.dict(os.environ, {
-        "NODE_NAME": "barry"
-    })
     @unittest.mock.patch("requests.get")
     def test_group(self, mock_get):
 
@@ -71,13 +68,22 @@ class TestService(unittest.TestCase):
         }]})
 
         mock_get.assert_has_calls([
-            unittest.mock.call("http://barry:8083/app/speech.nandy.io/member"),
+            unittest.mock.call("http://api.klot-io/app/speech.nandy.io/member"),
             unittest.mock.call().raise_for_status(),
             unittest.mock.call().json()
         ])
 
+    @unittest.mock.patch("builtins.open", create=True)
     @unittest.mock.patch("service.time.time")
-    def test_Speak(self, mock_time):
+    def test_Speak(self, mock_time, mock_open):
+
+        mock_open.side_effect = [
+            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value,
+            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value,
+            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value,
+            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value,
+            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value
+        ]
 
         response = self.api.options("/speak")
         self.assertEqual(response.status_code, 200, response.json)
@@ -128,15 +134,11 @@ class TestService(unittest.TestCase):
                     "name": "node",
                     "options": [
                         "*",
-                        "people",
-                        "stuff",
-                        "things"
+                        "unittest"
                     ],
                     "labels": {
                         "*": "all",
-                        "people": "people",
-                        "stuff": "stuff",
-                        "things": "things"
+                        "unittest": "unittest"
                     },
                     "default": "",
                     "optional": True
@@ -195,15 +197,11 @@ class TestService(unittest.TestCase):
                     "name": "node",
                     "options": [
                         "*",
-                        "people",
-                        "stuff",
-                        "things"
+                        "unittest"
                     ],
                     "labels": {
                         "*": "all",
-                        "people": "people",
-                        "stuff": "stuff",
-                        "things": "things"
+                        "unittest": "unittest"
                     },
                     "default": "",
                     "optional": True,
@@ -269,15 +267,11 @@ class TestService(unittest.TestCase):
                     "name": "node",
                     "options": [
                         "*",
-                        "people",
-                        "stuff",
-                        "things"
+                        "unittest"
                     ],
                     "labels": {
                         "*": "all",
-                        "people": "people",
-                        "stuff": "stuff",
-                        "things": "things"
+                        "unittest": "unittest"
                     },
                     "default": "",
                     "optional": True,
@@ -315,7 +309,7 @@ class TestService(unittest.TestCase):
             "speak": {
                 "text": "hi",
                 "language": "en-AU",
-                "node": "stuff"
+                "node": "unittest"
             }
         })
         self.assertEqual(response.status_code, 202, response.json)
@@ -324,7 +318,7 @@ class TestService(unittest.TestCase):
                 "timestamp": 7,
                 "text": "hi",
                 "language": "en-AU",
-                "node": "stuff"
+                "node": "unittest"
             }
         })
         self.assertEqual(self.app.redis.channel, "stuff")
@@ -332,10 +326,15 @@ class TestService(unittest.TestCase):
             "timestamp": 7,
             "text": "hi",
             "language": "en-AU",
-            "node": "stuff"
+            "node": "unittest"
         })
 
-    def test_Integrate(self):
+    @unittest.mock.patch("builtins.open", create=True)
+    def test_Integrate(self, mock_open):
+
+        mock_open.side_effect = [
+            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value
+        ]
 
         response = self.api.options("/integrate")
         self.assertEqual(response.status_code, 200, response.json)
@@ -383,15 +382,11 @@ class TestService(unittest.TestCase):
                     "name": "node",
                     "options": [
                         "*",
-                        "people",
-                        "stuff",
-                        "things"
+                        "unittest"
                     ],
                     "labels": {
                         "*": "all",
-                        "people": "people",
-                        "stuff": "stuff",
-                        "things": "things"
+                        "unittest": "unittest"
                     },
                     "default": "",
                     "optional": True

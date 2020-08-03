@@ -4,7 +4,6 @@ Main module for daemon
 
 import os
 import time
-import traceback
 
 import json
 import yaml
@@ -19,7 +18,7 @@ class Daemon(object):
 
     def __init__(self):
 
-        self.node = os.environ['K8S_NODE']
+        self.node = os.environ['NODE_NAME']
 
         self.speech_file = os.environ['SPEECH_FILE']
         self.sleep = int(os.environ['SLEEP'])
@@ -70,9 +69,5 @@ class Daemon(object):
         self.subscribe()
 
         while True:
-            try:
-                self.process()
-                time.sleep(self.sleep)
-            except Exception as exception:
-                print(exception)
-                print(traceback.format_exc())
+            self.process()
+            time.sleep(self.sleep)
