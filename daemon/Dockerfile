@@ -1,4 +1,4 @@
-FROM klotio/python:0.1
+FROM klotio/python:0.2
 
 COPY requirements.txt .
 

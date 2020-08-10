@@ -35,5 +35,7 @@ spec:
           value: /tmp/speech.mp3
         - name: SLEEP
           value: "1"
+        - name: LOG_LEVEL
+          value: WARNING
         securityContext:
           privileged: true
