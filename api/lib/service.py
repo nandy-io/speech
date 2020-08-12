@@ -115,7 +115,7 @@ class Speak(flask_restful.Resource):
 
         return fields
 
-    @klotio_flask_restful.require_logging
+    @klotio_flask_restful.logger
     def options(self):
 
         values = flask.request.json[self.name] if flask.request.json and self.name in flask.request.json else None
@@ -127,7 +127,7 @@ class Speak(flask_restful.Resource):
         else:
             return {"fields": fields.to_list()}
 
-    @klotio_flask_restful.require_logging
+    @klotio_flask_restful.logger
     def post(self):
 
         if not flask.request.json or self.name not in flask.request.json:
@@ -153,7 +153,7 @@ class Speak(flask_restful.Resource):
 
 class Integrate(flask_restful.Resource):
 
-    @klotio_flask_restful.require_logging
+    @klotio_flask_restful.logger
     def options(self):
 
         return {"fields": Speak.fields().to_list()[1:]}
