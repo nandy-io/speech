@@ -16,16 +16,6 @@ pipeline {
                 }
             }
         }
-        stage('Push api') {
-            when {
-                branch 'master'
-            }
-            steps {
-                dir('api') {
-                    sh 'make push'
-                }
-            }
-        }
         stage('Build daemon') {
             steps {
                 dir('daemon') {
@@ -40,6 +30,23 @@ pipeline {
                 }
             }
         }
+        stage('Build gui') {
+            steps {
+                dir('gui') {
+                    sh 'make build'
+                }
+            }
+        }
+        stage('Push api') {
+            when {
+                branch 'master'
+            }
+            steps {
+                dir('api') {
+                    sh 'make push'
+                }
+            }
+        }
         stage('Push daemon') {
             when {
                 branch 'master'
@@ -47,13 +54,6 @@ pipeline {
             steps {
                 dir('daemon') {
                     sh 'make push'
-                }
-            }
-        }
-        stage('Build gui') {
-            steps {
-                dir('gui') {
-                    sh 'make build'
                 }
             }
         }
