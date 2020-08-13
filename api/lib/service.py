@@ -33,10 +33,12 @@ def app():
 
     app.logger = klotio.logger(app.name)
 
-    app.logger.debug("settings", extra={
-        "settings": {
-            "redis": str(app.redis),
-            "channel": app.channel
+    app.logger.debug("init", extra={
+        "init": {
+            "redis": {
+                "connection": str(app.redis),
+                "channel": app.channel
+            }
         }
     })
 

@@ -33,12 +33,14 @@ class Daemon(object):
 
         self.logger = klotio.logger("nandy-io-speech-daemon")
 
-        self.logger.debug("settings", extra={
-            "settings": {
+        self.logger.debug("init", extra={
+            "init": {
                 "node": self.node,
                 "sleep": self.sleep,
-                "redis": str(self.redis),
-                "channel": self.channel
+                "redis": {
+                    "connection": str(self.redis),
+                    "channel": self.channel
+                }
             }
         })
 
