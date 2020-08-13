@@ -42,10 +42,12 @@ class TestAPI(TestRestful):
 
         self.assertEqual(app.logger.name, "nandy-io-speech-api")
 
-        self.assertLogged(app.logger, "debug", "settings", extra={
-            "settings": {
-                "redis": "MockRedis<host=most.com,port=667>",
-                "channel": "stuff"
+        self.assertLogged(app.logger, "debug", "init", extra={
+            "init": {
+                "redis": {
+                    "connection": "MockRedis<host=most.com,port=667>",
+                    "channel": "stuff"
+                }
             }
         })
 

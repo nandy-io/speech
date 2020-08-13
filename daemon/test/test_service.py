@@ -61,12 +61,14 @@ class TestService(klotio_unittest.TestCase):
 
         self.assertEqual(daemon.logger.name, "nandy-io-speech-daemon")
 
-        self.assertLogged(daemon.logger, "debug", "settings", extra={
-            "settings": {
+        self.assertLogged(daemon.logger, "debug", "init", extra={
+            "init": {
                 "node": "noisy",
                 "sleep": 7,
-                "redis": "MockRedis<host=most.com,port=667>",
-                "channel": "stuff"
+                "redis": {
+                    "connection": "MockRedis<host=most.com,port=667>",
+                    "channel": "stuff"
+                }
             }
         })
 
