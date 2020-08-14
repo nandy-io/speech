@@ -2,42 +2,42 @@ pipeline {
     agent any
 
     stages {
-        stage('Build api') {
+        stage('build api') {
             steps {
                 dir('api') {
                     sh 'make build'
                 }
             }
         }
-        stage('Test api') {
+        stage('test api') {
             steps {
                 dir('api') {
                     sh 'make test'
                 }
             }
         }
-        stage('Build daemon') {
+        stage('build daemon') {
             steps {
                 dir('daemon') {
                     sh 'make build'
                 }
             }
         }
-        stage('Test daemon') {
+        stage('test daemon') {
             steps {
                 dir('daemon') {
                     sh 'make test'
                 }
             }
         }
-        stage('Build gui') {
+        stage('build gui') {
             steps {
                 dir('gui') {
                     sh 'make build'
                 }
             }
         }
-        stage('Push api') {
+        stage('push api') {
             when {
                 branch 'master'
             }
@@ -47,7 +47,7 @@ pipeline {
                 }
             }
         }
-        stage('Push daemon') {
+        stage('push daemon') {
             when {
                 branch 'master'
             }
@@ -57,7 +57,7 @@ pipeline {
                 }
             }
         }
-        stage('Push gui') {
+        stage('push gui') {
             when {
                 branch 'master'
             }
