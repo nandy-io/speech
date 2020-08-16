@@ -145,6 +145,7 @@ class TestService(klotio_unittest.TestCase):
                 "timestamp": 7,
                 "text": "hey",
                 "node": "noisy"
+
             }
         })
 

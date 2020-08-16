@@ -3,6 +3,7 @@ Module for creating the Speech Flask API
 """
 
 import os
+import sys
 import time
 import json
 
@@ -10,6 +11,9 @@ import redis
 import flask
 import flask_restful
 import opengui
+
+import klotio
+import klotio_flask_restful
 
 import klotio
 import klotio_flask_restful
