@@ -3,7 +3,6 @@ Module for creating the Speech Flask API
 """
 
 import os
-import sys
 import time
 import json
 
