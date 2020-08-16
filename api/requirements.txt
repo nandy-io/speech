@@ -1,1 +1,0 @@
-git+https://github.com/gaf3/opengui.git@v0.5#egg=opengui

@@ -1,31 +1,11 @@
 import unittest
 import unittest.mock
+import klotio_unittest
 
 import os
 import json
 
 import service
-
-class MockRedis(object):
-
-    def __init__(self, host, port):
-
-        self.host = host
-        self.port = port
-        self.channel = None
-        self.messages = []
-
-    def pubsub(self):
-
-        return self
-
-    def subscribe(self, channel):
-
-        self.channel = channel
-
-    def get_message(self):
-
-        return self.messages.pop(0)
 
 
 class MockgTTS(object):
@@ -41,7 +21,7 @@ class MockgTTS(object):
         self.saved = file_name
 
 
-class TestService(unittest.TestCase):
+class TestService(klotio_unittest.TestCase):
 
     @unittest.mock.patch.dict(os.environ, {
         "NODE_NAME": "noisy",
@@ -51,7 +31,8 @@ class TestService(unittest.TestCase):
         "SPEECH_FILE": "blah.mp3",
         "SLEEP": "7"
     })
-    @unittest.mock.patch("redis.StrictRedis", MockRedis)
+    @unittest.mock.patch("redis.Redis", klotio_unittest.MockRedis)
+    @unittest.mock.patch("klotio.logger", klotio_unittest.MockLogger)
     def setUp(self):
 
         self.daemon = service.Daemon()
@@ -64,7 +45,8 @@ class TestService(unittest.TestCase):
         "SPEECH_FILE": "blah.mp3",
         "SLEEP": "7"
     })
-    @unittest.mock.patch("redis.StrictRedis", MockRedis)
+    @unittest.mock.patch("redis.Redis", klotio_unittest.MockRedis)
+    @unittest.mock.patch("klotio.logger", klotio_unittest.MockLogger)
     def test___init___(self):
 
         daemon = service.Daemon()
@@ -77,12 +59,27 @@ class TestService(unittest.TestCase):
         self.assertEqual(daemon.sleep, 7)
         self.assertIsNone(daemon.pubsub)
 
+        self.assertEqual(daemon.logger.name, "nandy-io-speech-daemon")
+
+        self.assertLogged(daemon.logger, "debug", "init", extra={
+            "init": {
+                "node": "noisy",
+                "sleep": 7,
+                "redis": {
+                    "connection": "MockRedis<host=most.com,port=667>",
+                    "channel": "stuff"
+                }
+            }
+        })
+
     def test_subscribe(self):
 
         self.daemon.subscribe()
 
         self.assertEqual(self.daemon.redis, self.daemon.pubsub)
         self.assertEqual(self.daemon.redis.channel, "stuff")
+
+        self.assertLogged(self.daemon.logger, "info", "subscribing")
 
     @unittest.mock.patch("gtts.gTTS", MockgTTS)
     @unittest.mock.patch("os.system")
@@ -95,6 +92,13 @@ class TestService(unittest.TestCase):
         self.assertEqual(self.daemon.tts.saved, "blah.mp3")
         mock_system.assert_called_once_with("mpg123 -q blah.mp3")
 
+        self.assertLogged(self.daemon.logger, "info", "speak", extra={
+            "speak": {
+                "text": "hey",
+                "language": "murican"
+            }
+        })
+
     @unittest.mock.patch("gtts.gTTS", MockgTTS)
     @unittest.mock.patch("os.system")
     def test_process(self, mock_system):
@@ -102,6 +106,10 @@ class TestService(unittest.TestCase):
         self.daemon.subscribe()
 
         self.daemon.redis.messages = [
+            {
+                "nope": "nothing",
+                "data": 1
+            },
             {
                 "data": json.dumps({
                     "timestamp": 7,
@@ -120,8 +128,25 @@ class TestService(unittest.TestCase):
         ]
 
         self.daemon.process()
+
+        self.assertLogged(self.daemon.logger, "debug", "get_message", extra={
+            "get_message": {
+                "nope": "nothing",
+                "data": 1
+            }
+        })
+
+        self.daemon.process()
         self.assertEqual(self.daemon.tts.text, "hey")
         self.assertEqual(self.daemon.tts.lang, "en")
+
+        self.assertLogged(self.daemon.logger, "info", "data", extra={
+            "data": {
+                    "timestamp": 7,
+                    "text": "hey",
+                    "node": "noisy"
+            }
+        })
 
         self.daemon.process()
         self.assertEqual(self.daemon.tts.text, "hey")

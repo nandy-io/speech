@@ -11,6 +11,8 @@ import redis
 import gtts
 import patch
 
+import klotio
+
 class Daemon(object):
     """
     Main class for daemon
@@ -23,16 +25,31 @@ class Daemon(object):
         self.speech_file = os.environ['SPEECH_FILE']
         self.sleep = int(os.environ['SLEEP'])
 
-        self.redis = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=int(os.environ['REDIS_PORT']))
+        self.redis = redis.Redis(host=os.environ['REDIS_HOST'], port=int(os.environ['REDIS_PORT']))
         self.channel = os.environ['REDIS_CHANNEL']
 
         self.pubsub = None
         self.tts = None
 
+        self.logger = klotio.logger("nandy-io-speech-daemon")
+
+        self.logger.debug("init", extra={
+            "init": {
+                "node": self.node,
+                "sleep": self.sleep,
+                "redis": {
+                    "connection": str(self.redis),
+                    "channel": self.channel
+                }
+            }
+        })
+
     def subscribe(self):
         """
         Subscribes to the channel on Redis
         """
+
+        self.logger.info("subscribing")
 
         self.pubsub = self.redis.pubsub()
         self.pubsub.subscribe(self.channel)
@@ -41,6 +58,13 @@ class Daemon(object):
         """
         Speaks the text in the language
         """
+
+        speak = {
+            "text": text,
+            "language": language
+        }
+
+        self.logger.info("speak", extra={"speak": speak})
 
         self.tts = gtts.gTTS(text, lang=language)
         self.tts.save(self.speech_file)
@@ -53,10 +77,14 @@ class Daemon(object):
 
         message = self.pubsub.get_message()
 
-        if not message:
+        self.logger.debug("get_message", extra={"get_message": message})
+
+        if not message or not isinstance(message.get("data"), (str, bytes)):
             return
 
         data = json.loads(message['data'])
+
+        self.logger.info("data", extra={"data": data})
 
         if data.get("node") in ["*", self.node]:
             self.speak(data["text"], data.get("language", "en"))

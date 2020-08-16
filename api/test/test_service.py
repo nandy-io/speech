@@ -1,71 +1,78 @@
 import unittest
 import unittest.mock
+import klotio_unittest
 
 import os
 import json
 
 import service
 
-class MockRedis(object):
-
-    def __init__(self, host, port):
-
-        self.host = host
-        self.port = port
-        self.channel = None
-
-        self.messages = []
-
-    def publish(self, channel, message):
-
-        self.channel = channel
-        self.messages.append(message)
-
-class TestService(unittest.TestCase):
-
-    maxDiff = None
+class TestRestful(klotio_unittest.TestCase):
 
     @unittest.mock.patch.dict(os.environ, {
         "REDIS_HOST": "most.com",
         "REDIS_PORT": "667",
         "REDIS_CHANNEL": "stuff"
     })
-    @unittest.mock.patch("redis.StrictRedis", MockRedis)
+    @unittest.mock.patch("redis.Redis", klotio_unittest.MockRedis)
+    @unittest.mock.patch("klotio.logger", klotio_unittest.MockLogger)
     def setUp(self):
 
         self.app = service.app()
         self.api = self.app.test_client()
 
+
+class TestAPI(TestRestful):
+
     @unittest.mock.patch.dict(os.environ, {
         "REDIS_HOST": "most.com",
         "REDIS_PORT": "667",
         "REDIS_CHANNEL": "stuff"
     })
-    @unittest.mock.patch("redis.StrictRedis", MockRedis)
+    @unittest.mock.patch("redis.Redis", klotio_unittest.MockRedis)
+    @unittest.mock.patch("klotio.logger", klotio_unittest.MockLogger)
     def test_app(self):
 
         app = service.app()
 
+        self.assertEqual(app.name, "nandy-io-speech-api")
         self.assertEqual(app.redis.host, "most.com")
         self.assertEqual(app.redis.port, 667)
         self.assertEqual(app.channel, "stuff")
 
-    def test_health(self):
+        self.assertEqual(app.logger.name, "nandy-io-speech-api")
 
-        self.assertEqual(self.api.get("/health").json, {"message": "OK"})
+        self.assertLogged(app.logger, "debug", "init", extra={
+            "init": {
+                "redis": {
+                    "connection": "MockRedis<host=most.com,port=667>",
+                    "channel": "stuff"
+                }
+            }
+        })
+
+
+class TestHealth(TestRestful):
+
+    def test_get(self):
+
+        self.assertStatusValue(self.api.get("/health"), 200, "message", "OK")
+
+
+class TestGroup(TestRestful):
 
     @unittest.mock.patch("requests.get")
-    def test_group(self, mock_get):
+    def test_get(self, mock_get):
 
         mock_get.return_value.json.return_value = [{
             "name": "unit",
             "url": "test"
         }]
 
-        self.assertEqual(self.api.get("/group").json, {"group": [{
+        self.assertStatusValue(self.api.get("/group"), 200, "group", [{
             "name": "unit",
             "url": "test"
-        }]})
+        }])
 
         mock_get.assert_has_calls([
             unittest.mock.call("http://api.klot-io/app/speech.nandy.io/member"),
@@ -73,230 +80,306 @@ class TestService(unittest.TestCase):
             unittest.mock.call().json()
         ])
 
-    @unittest.mock.patch("builtins.open", create=True)
-    @unittest.mock.patch("service.time.time")
-    def test_Speak(self, mock_time, mock_open):
+class TestSpeak(TestRestful):
 
-        mock_open.side_effect = [
-            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value,
-            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value,
-            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value,
-            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value,
-            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value
-        ]
+    @unittest.mock.patch("klotio.settings")
+    def test_options(self, mock_settings):
 
-        response = self.api.options("/speak")
-        self.assertEqual(response.status_code, 200, response.json)
-        self.assertEqual(response.json, {
-            "fields": [
-                {
-                    "name": "text"
-                },
-                {
-                    "name": "language",
-                    "options": [
-                        "en-AU",
-                        "en-CA",
-                        "en-GH",
-                        "en-GB",
-                        "en-IN",
-                        "en-IE",
-                        "en-KE",
-                        "en-NZ",
-                        "en-NG",
-                        "en-PH",
-                        "en-SG",
-                        "en-ZA",
-                        "en-TZ",
-                        "en-US"
-                    ],
-                    "labels": {
-                        "en-AU": "English (Australia)",
-                        "en-CA": "English (Canada)",
-                        "en-GH": "English (Ghana)",
-                        "en-GB": "English (United Kingdom)",
-                        "en-IN": "English (India)",
-                        "en-IE": "English (Ireland)",
-                        "en-KE": "English (Kenya)",
-                        "en-NZ": "English (New Zealand)",
-                        "en-NG": "English (Nigeria)",
-                        "en-PH": "English (Philippines)",
-                        "en-SG": "English (Singapore)",
-                        "en-ZA": "English (South Africa)",
-                        "en-TZ": "English (Tanzania)",
-                        "en-US": "English (United States)"
-                    },
-                    "default": "en-US",
-                    "style": "select",
-                    "optional": True
-                },
-                {
-                    "name": "node",
-                    "options": [
-                        "*",
-                        "unittest"
-                    ],
-                    "labels": {
-                        "*": "all",
-                        "unittest": "unittest"
-                    },
-                    "default": "",
-                    "optional": True
-                }
+        mock_settings.return_value = {
+            "speakers": [
+                "unittest"
             ]
+        }
+
+        self.assertStatusFields(self.api.options("/speak"), 200, [
+            {
+                "name": "text"
+            },
+            {
+                "name": "language",
+                "options": [
+                    "en-AU",
+                    "en-CA",
+                    "en-GH",
+                    "en-GB",
+                    "en-IN",
+                    "en-IE",
+                    "en-KE",
+                    "en-NZ",
+                    "en-NG",
+                    "en-PH",
+                    "en-SG",
+                    "en-ZA",
+                    "en-TZ",
+                    "en-US"
+                ],
+                "labels": {
+                    "en-AU": "English (Australia)",
+                    "en-CA": "English (Canada)",
+                    "en-GH": "English (Ghana)",
+                    "en-GB": "English (United Kingdom)",
+                    "en-IN": "English (India)",
+                    "en-IE": "English (Ireland)",
+                    "en-KE": "English (Kenya)",
+                    "en-NZ": "English (New Zealand)",
+                    "en-NG": "English (Nigeria)",
+                    "en-PH": "English (Philippines)",
+                    "en-SG": "English (Singapore)",
+                    "en-ZA": "English (South Africa)",
+                    "en-TZ": "English (Tanzania)",
+                    "en-US": "English (United States)"
+                },
+                "default": "en-US",
+                "style": "select",
+                "optional": True
+            },
+            {
+                "name": "node",
+                "options": [
+                    "*",
+                    "unittest"
+                ],
+                "labels": {
+                    "*": "all",
+                    "unittest": "unittest"
+                },
+                "default": "",
+                "optional": True
+            }
+        ])
+
+        self.assertLogged(self.app.logger, "debug", "request", extra={
+            "request": {
+                "method": "OPTIONS",
+                "path": "/speak",
+                "remote_addr": "127.0.0.1"
+            }
         })
 
-        response = self.api.options("/speak", json={"speak": {"node": "womp"}})
-        self.assertEqual(response.status_code, 200, response.json)
-        self.assertEqual(response.json, {
-            "fields": [
-                {
-                    "name": "text",
-                    "errors": ["missing value"]
-                },
-                {
-                    "name": "language",
-                    "options": [
-                        "en-AU",
-                        "en-CA",
-                        "en-GH",
-                        "en-GB",
-                        "en-IN",
-                        "en-IE",
-                        "en-KE",
-                        "en-NZ",
-                        "en-NG",
-                        "en-PH",
-                        "en-SG",
-                        "en-ZA",
-                        "en-TZ",
-                        "en-US"
-                    ],
-                    "labels": {
-                        "en-AU": "English (Australia)",
-                        "en-CA": "English (Canada)",
-                        "en-GH": "English (Ghana)",
-                        "en-GB": "English (United Kingdom)",
-                        "en-IN": "English (India)",
-                        "en-IE": "English (Ireland)",
-                        "en-KE": "English (Kenya)",
-                        "en-NZ": "English (New Zealand)",
-                        "en-NG": "English (Nigeria)",
-                        "en-PH": "English (Philippines)",
-                        "en-SG": "English (Singapore)",
-                        "en-ZA": "English (South Africa)",
-                        "en-TZ": "English (Tanzania)",
-                        "en-US": "English (United States)"
-                    },
-                    "default": "en-US",
-                    "style": "select",
-                    "optional": True,
-                    "value": "en-US"
-                },
-                {
-                    "name": "node",
-                    "options": [
-                        "*",
-                        "unittest"
-                    ],
-                    "labels": {
-                        "*": "all",
-                        "unittest": "unittest"
-                    },
-                    "default": "",
-                    "optional": True,
-                    "value": "womp",
-                    "errors": ["invalid value 'womp'"]
+        self.assertLogged(self.app.logger, "debug", "response", extra={
+            "response": {
+                "status_code": 200,
+                "json": {
+                    "fields": [
+                        {
+                            "name": "text"
+                        },
+                        {
+                            "name": "language",
+                            "options": [
+                                "en-AU",
+                                "en-CA",
+                                "en-GH",
+                                "en-GB",
+                                "en-IN",
+                                "en-IE",
+                                "en-KE",
+                                "en-NZ",
+                                "en-NG",
+                                "en-PH",
+                                "en-SG",
+                                "en-ZA",
+                                "en-TZ",
+                                "en-US"
+                            ],
+                            "labels": {
+                                "en-AU": "English (Australia)",
+                                "en-CA": "English (Canada)",
+                                "en-GH": "English (Ghana)",
+                                "en-GB": "English (United Kingdom)",
+                                "en-IN": "English (India)",
+                                "en-IE": "English (Ireland)",
+                                "en-KE": "English (Kenya)",
+                                "en-NZ": "English (New Zealand)",
+                                "en-NG": "English (Nigeria)",
+                                "en-PH": "English (Philippines)",
+                                "en-SG": "English (Singapore)",
+                                "en-ZA": "English (South Africa)",
+                                "en-TZ": "English (Tanzania)",
+                                "en-US": "English (United States)"
+                            },
+                            "default": "en-US",
+                            "style": "select",
+                            "optional": True
+                        },
+                        {
+                            "name": "node",
+                            "options": [
+                                "*",
+                                "unittest"
+                            ],
+                            "labels": {
+                                "*": "all",
+                                "unittest": "unittest"
+                            },
+                            "default": "",
+                            "optional": True
+                        }
+                    ]
                 }
-            ],
-            "errors": []
+            }
         })
 
-        response = self.api.post("/speak")
-        self.assertEqual(response.status_code, 400, response.json)
-        self.assertEqual(response.json["errors"], ["missing speak"])
+        self.assertStatusFields(self.api.options("/speak", json={"speak": {"node": "womp"}}), 200, [
+            {
+                "name": "text",
+                "errors": ["missing value"]
+            },
+            {
+                "name": "language",
+                "options": [
+                    "en-AU",
+                    "en-CA",
+                    "en-GH",
+                    "en-GB",
+                    "en-IN",
+                    "en-IE",
+                    "en-KE",
+                    "en-NZ",
+                    "en-NG",
+                    "en-PH",
+                    "en-SG",
+                    "en-ZA",
+                    "en-TZ",
+                    "en-US"
+                ],
+                "labels": {
+                    "en-AU": "English (Australia)",
+                    "en-CA": "English (Canada)",
+                    "en-GH": "English (Ghana)",
+                    "en-GB": "English (United Kingdom)",
+                    "en-IN": "English (India)",
+                    "en-IE": "English (Ireland)",
+                    "en-KE": "English (Kenya)",
+                    "en-NZ": "English (New Zealand)",
+                    "en-NG": "English (Nigeria)",
+                    "en-PH": "English (Philippines)",
+                    "en-SG": "English (Singapore)",
+                    "en-ZA": "English (South Africa)",
+                    "en-TZ": "English (Tanzania)",
+                    "en-US": "English (United States)"
+                },
+                "default": "en-US",
+                "style": "select",
+                "optional": True,
+                "value": "en-US"
+            },
+            {
+                "name": "node",
+                "options": [
+                    "*",
+                    "unittest"
+                ],
+                "labels": {
+                    "*": "all",
+                    "unittest": "unittest"
+                },
+                "default": "",
+                "optional": True,
+                "value": "womp",
+                "errors": ["invalid value 'womp'"]
+            }
+        ], errors=[])
 
-        response = self.api.post("/speak", json={"speak": {"node": "womp"}})
-        self.assertEqual(response.status_code, 400, response.json)
-        self.assertEqual(response.json, {
-            "fields": [
-                {
-                    "name": "text",
-                    "errors": ["missing value"]
-                },
-                {
-                    "name": "language",
-                    "options": [
-                        "en-AU",
-                        "en-CA",
-                        "en-GH",
-                        "en-GB",
-                        "en-IN",
-                        "en-IE",
-                        "en-KE",
-                        "en-NZ",
-                        "en-NG",
-                        "en-PH",
-                        "en-SG",
-                        "en-ZA",
-                        "en-TZ",
-                        "en-US"
-                    ],
-                    "labels": {
-                        "en-AU": "English (Australia)",
-                        "en-CA": "English (Canada)",
-                        "en-GH": "English (Ghana)",
-                        "en-GB": "English (United Kingdom)",
-                        "en-IN": "English (India)",
-                        "en-IE": "English (Ireland)",
-                        "en-KE": "English (Kenya)",
-                        "en-NZ": "English (New Zealand)",
-                        "en-NG": "English (Nigeria)",
-                        "en-PH": "English (Philippines)",
-                        "en-SG": "English (Singapore)",
-                        "en-ZA": "English (South Africa)",
-                        "en-TZ": "English (Tanzania)",
-                        "en-US": "English (United States)"
-                    },
-                    "default": "en-US",
-                    "style": "select",
-                    "optional": True,
-                    "value": "en-US"
-                },
-                {
-                    "name": "node",
-                    "options": [
-                        "*",
-                        "unittest"
-                    ],
-                    "labels": {
-                        "*": "all",
-                        "unittest": "unittest"
-                    },
-                    "default": "",
-                    "optional": True,
-                    "value": "womp",
-                    "errors": ["invalid value 'womp'"]
+    @unittest.mock.patch("klotio.settings")
+    @unittest.mock.patch("service.time.time", unittest.mock.MagicMock(return_value=7.0))
+    def test_post(self, mock_settings):
+
+        mock_settings.return_value = {
+            "speakers": [
+                "unittest"
+            ]
+        }
+
+        self.assertStatusValue(self.api.post("/speak"), 400, "errors", ["missing speak"])
+
+        self.assertLogged(self.app.logger, "debug", "request", extra={
+            "request": {
+                "method": "POST",
+                "path": "/speak",
+                "remote_addr": "127.0.0.1"
+            }
+        })
+
+        self.assertLogged(self.app.logger, "debug", "response", extra={
+            "response": {
+                "status_code": 400,
+                "json": {
+                    "errors": ["missing speak"]
                 }
-            ],
-            "errors": []
+            }
         })
 
-        mock_time.return_value = 7
+        self.assertStatusFields(self.api.post("/speak", json={"speak": {"node": "womp"}}), 400, [
+            {
+                "name": "text",
+                "errors": ["missing value"]
+            },
+            {
+                "name": "language",
+                "options": [
+                    "en-AU",
+                    "en-CA",
+                    "en-GH",
+                    "en-GB",
+                    "en-IN",
+                    "en-IE",
+                    "en-KE",
+                    "en-NZ",
+                    "en-NG",
+                    "en-PH",
+                    "en-SG",
+                    "en-ZA",
+                    "en-TZ",
+                    "en-US"
+                ],
+                "labels": {
+                    "en-AU": "English (Australia)",
+                    "en-CA": "English (Canada)",
+                    "en-GH": "English (Ghana)",
+                    "en-GB": "English (United Kingdom)",
+                    "en-IN": "English (India)",
+                    "en-IE": "English (Ireland)",
+                    "en-KE": "English (Kenya)",
+                    "en-NZ": "English (New Zealand)",
+                    "en-NG": "English (Nigeria)",
+                    "en-PH": "English (Philippines)",
+                    "en-SG": "English (Singapore)",
+                    "en-ZA": "English (South Africa)",
+                    "en-TZ": "English (Tanzania)",
+                    "en-US": "English (United States)"
+                },
+                "default": "en-US",
+                "style": "select",
+                "optional": True,
+                "value": "en-US"
+            },
+            {
+                "name": "node",
+                "options": [
+                    "*",
+                    "unittest"
+                ],
+                "labels": {
+                    "*": "all",
+                    "unittest": "unittest"
+                },
+                "default": "",
+                "optional": True,
+                "value": "womp",
+                "errors": ["invalid value 'womp'"]
+            }
+        ], errors=[])
 
-        response = self.api.post("/speak", json={
+        self.assertStatusValue(self.api.post("/speak", json={
             "speak": {
                 "text": "hi",
                 "language": "en-AU"
             }
-        })
-        self.assertEqual(response.status_code, 202, response.json)
-        self.assertEqual(response.json, {
-            "message": {
-                "timestamp": 7,
-                "text": "hi",
-                "language": "en-AU"
-            }
+        }), 202, "message", {
+            "timestamp": 7,
+            "text": "hi",
+            "language": "en-AU"
         })
         self.assertEqual(self.app.redis.channel, "stuff")
         self.assertEqual(json.loads(self.app.redis.messages[0]), {
@@ -305,21 +388,17 @@ class TestService(unittest.TestCase):
             "language": "en-AU"
         })
 
-        response = self.api.post("/speak", json={
+        self.assertStatusValue(self.api.post("/speak", json={
             "speak": {
                 "text": "hi",
                 "language": "en-AU",
                 "node": "unittest"
             }
-        })
-        self.assertEqual(response.status_code, 202, response.json)
-        self.assertEqual(response.json, {
-            "message": {
+        }), 202, "message", {
                 "timestamp": 7,
                 "text": "hi",
                 "language": "en-AU",
                 "node": "unittest"
-            }
         })
         self.assertEqual(self.app.redis.channel, "stuff")
         self.assertEqual(json.loads(self.app.redis.messages[1]), {
@@ -329,67 +408,136 @@ class TestService(unittest.TestCase):
             "node": "unittest"
         })
 
-    @unittest.mock.patch("builtins.open", create=True)
-    def test_Integrate(self, mock_open):
+class TestIntegrate(TestRestful):
 
-        mock_open.side_effect = [
-            unittest.mock.mock_open(read_data='speakers:\n- unittest').return_value
-        ]
+    @unittest.mock.patch("klotio.settings")
+    def test_options(self, mock_settings):
 
-        response = self.api.options("/integrate")
-        self.assertEqual(response.status_code, 200, response.json)
-        self.assertEqual(response.json, {
-            "fields": [
-                {
-                    "name": "language",
-                    "options": [
-                        "en-AU",
-                        "en-CA",
-                        "en-GH",
-                        "en-GB",
-                        "en-IN",
-                        "en-IE",
-                        "en-KE",
-                        "en-NZ",
-                        "en-NG",
-                        "en-PH",
-                        "en-SG",
-                        "en-ZA",
-                        "en-TZ",
-                        "en-US"
-                    ],
-                    "labels": {
-                        "en-AU": "English (Australia)",
-                        "en-CA": "English (Canada)",
-                        "en-GH": "English (Ghana)",
-                        "en-GB": "English (United Kingdom)",
-                        "en-IN": "English (India)",
-                        "en-IE": "English (Ireland)",
-                        "en-KE": "English (Kenya)",
-                        "en-NZ": "English (New Zealand)",
-                        "en-NG": "English (Nigeria)",
-                        "en-PH": "English (Philippines)",
-                        "en-SG": "English (Singapore)",
-                        "en-ZA": "English (South Africa)",
-                        "en-TZ": "English (Tanzania)",
-                        "en-US": "English (United States)"
-                    },
-                    "default": "en-US",
-                    "style": "select",
-                    "optional": True
-                },
-                {
-                    "name": "node",
-                    "options": [
-                        "*",
-                        "unittest"
-                    ],
-                    "labels": {
-                        "*": "all",
-                        "unittest": "unittest"
-                    },
-                    "default": "",
-                    "optional": True
-                }
+        mock_settings.return_value = {
+            "speakers": [
+                "unittest"
             ]
+        }
+
+        self.assertStatusFields(self.api.options("/integrate"), 200, [
+            {
+                "name": "language",
+                "options": [
+                    "en-AU",
+                    "en-CA",
+                    "en-GH",
+                    "en-GB",
+                    "en-IN",
+                    "en-IE",
+                    "en-KE",
+                    "en-NZ",
+                    "en-NG",
+                    "en-PH",
+                    "en-SG",
+                    "en-ZA",
+                    "en-TZ",
+                    "en-US"
+                ],
+                "labels": {
+                    "en-AU": "English (Australia)",
+                    "en-CA": "English (Canada)",
+                    "en-GH": "English (Ghana)",
+                    "en-GB": "English (United Kingdom)",
+                    "en-IN": "English (India)",
+                    "en-IE": "English (Ireland)",
+                    "en-KE": "English (Kenya)",
+                    "en-NZ": "English (New Zealand)",
+                    "en-NG": "English (Nigeria)",
+                    "en-PH": "English (Philippines)",
+                    "en-SG": "English (Singapore)",
+                    "en-ZA": "English (South Africa)",
+                    "en-TZ": "English (Tanzania)",
+                    "en-US": "English (United States)"
+                },
+                "default": "en-US",
+                "style": "select",
+                "optional": True
+            },
+            {
+                "name": "node",
+                "options": [
+                    "*",
+                    "unittest"
+                ],
+                "labels": {
+                    "*": "all",
+                    "unittest": "unittest"
+                },
+                "default": "",
+                "optional": True
+            }
+        ])
+
+        self.assertLogged(self.app.logger, "debug", "request", extra={
+            "request": {
+                "method": "OPTIONS",
+                "path": "/integrate",
+                "remote_addr": "127.0.0.1"
+            }
+        })
+
+        self.assertLogged(self.app.logger, "debug", "response", extra={
+            "response": {
+                "status_code": 200,
+                "json": {
+                    "fields": [
+                        {
+                            "name": "language",
+                            "options": [
+                                "en-AU",
+                                "en-CA",
+                                "en-GH",
+                                "en-GB",
+                                "en-IN",
+                                "en-IE",
+                                "en-KE",
+                                "en-NZ",
+                                "en-NG",
+                                "en-PH",
+                                "en-SG",
+                                "en-ZA",
+                                "en-TZ",
+                                "en-US"
+                            ],
+                            "labels": {
+                                "en-AU": "English (Australia)",
+                                "en-CA": "English (Canada)",
+                                "en-GH": "English (Ghana)",
+                                "en-GB": "English (United Kingdom)",
+                                "en-IN": "English (India)",
+                                "en-IE": "English (Ireland)",
+                                "en-KE": "English (Kenya)",
+                                "en-NZ": "English (New Zealand)",
+                                "en-NG": "English (Nigeria)",
+                                "en-PH": "English (Philippines)",
+                                "en-SG": "English (Singapore)",
+                                "en-ZA": "English (South Africa)",
+                                "en-TZ": "English (Tanzania)",
+                                "en-US": "English (United States)"
+                            },
+                            "default": "en-US",
+                            "style": "select",
+                            "optional": True
+                        },
+                        {
+                            "name": "node",
+                            "options": [
+                                "*",
+                                "unittest"
+                            ],
+                            "labels": {
+                                "*": "all",
+                                "unittest": "unittest"
+                            },
+                            "default": "",
+                            "optional": True
+                        }
+                    ]
+                }
+            }
         })

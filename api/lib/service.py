@@ -1,7 +1,11 @@
 import os
+import sys
 import time
 import json
 import yaml
+import logging
+import functools
+import traceback
 
 import redis
 import flask
@@ -9,36 +13,40 @@ import flask_restful
 import opengui
 import requests
 
+import klotio
+import klotio_flask_restful
+
 
 def app():
 
     app = flask.Flask("nandy-io-speech-api")
 
-    app.redis = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=int(os.environ['REDIS_PORT']))
+    app.redis = redis.Redis(host=os.environ['REDIS_HOST'], port=int(os.environ['REDIS_PORT']))
     app.channel = os.environ['REDIS_CHANNEL']
 
     api = flask_restful.Api(app)
 
-    api.add_resource(Health, '/health')
+    api.add_resource(klotio_flask_restful.Health, '/health')
     api.add_resource(Group, '/group')
     api.add_resource(Speak, '/speak')
     api.add_resource(Integrate, '/integrate')
 
+    app.logger = klotio.logger(app.name)
+
+    app.logger.debug("init", extra={
+        "init": {
+            "redis": {
+                "connection": str(app.redis),
+                "channel": app.channel
+            }
+        }
+    })
+
     return app
 
 
-class Health(flask_restful.Resource):
-    def get(self):
-        return {"message": "OK"}
-
-
-class Group(flask_restful.Resource):
-    def get(self):
-        response = requests.get(f"http://api.klot-io/app/speech.nandy.io/member")
-
-        response.raise_for_status()
-
-        return {"group": response.json()}
+class Group(klotio_flask_restful.Group):
+    APP = "speech.nandy.io"
 
 
 class Speak(flask_restful.Resource):
@@ -103,13 +111,13 @@ class Speak(flask_restful.Resource):
             }
         ])
 
-        with open("/opt/service/config/settings.yaml", "r") as settings_file:
-            for node in yaml.safe_load(settings_file)["speakers"]:
-                fields["node"].options.append(node)
-                fields["node"].content["labels"][node] = node
+        for node in klotio.settings()["speakers"]:
+            fields["node"].options.append(node)
+            fields["node"].content["labels"][node] = node
 
         return fields
 
+    @klotio_flask_restful.logger
     def options(self):
 
         values = flask.request.json[self.name] if flask.request.json and self.name in flask.request.json else None
@@ -121,6 +129,7 @@ class Speak(flask_restful.Resource):
         else:
             return {"fields": fields.to_list()}
 
+    @klotio_flask_restful.logger
     def post(self):
 
         if not flask.request.json or self.name not in flask.request.json:
@@ -146,6 +155,7 @@ class Speak(flask_restful.Resource):
 
 class Integrate(flask_restful.Resource):
 
+    @klotio_flask_restful.logger
     def options(self):
 
         return {"fields": Speak.fields().to_list()[1:]}
