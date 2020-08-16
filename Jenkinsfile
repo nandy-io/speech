@@ -16,6 +16,13 @@ pipeline {
                 }
             }
         }
+        stage('lint api') {
+            steps {
+                dir('api') {
+                    sh 'make lint'
+                }
+            }
+        }
         stage('build daemon') {
             steps {
                 dir('daemon') {
@@ -27,6 +34,13 @@ pipeline {
             steps {
                 dir('daemon') {
                     sh 'make test'
+                }
+            }
+        }
+        stage('lint daemon') {
+            steps {
+                dir('daemon') {
+                    sh 'make lint'
                 }
             }
         }

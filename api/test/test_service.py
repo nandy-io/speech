@@ -18,7 +18,7 @@ class TestRestful(klotio_unittest.TestCase):
     @unittest.mock.patch("klotio.logger", klotio_unittest.MockLogger)
     def setUp(self):
 
-        self.app = service.app()
+        self.app = service.build()
         self.api = self.app.test_client()
 
 
@@ -33,7 +33,7 @@ class TestAPI(TestRestful):
     @unittest.mock.patch("klotio.logger", klotio_unittest.MockLogger)
     def test_app(self):
 
-        app = service.app()
+        app = service.build()
 
         self.assertEqual(app.name, "nandy-io-speech-api")
         self.assertEqual(app.redis.host, "most.com")

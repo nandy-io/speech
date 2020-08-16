@@ -1,23 +1,24 @@
+"""
+Module for creating the Speech Flask API
+"""
+
 import os
-import sys
 import time
 import json
-import yaml
-import logging
-import functools
-import traceback
 
 import redis
 import flask
 import flask_restful
 import opengui
-import requests
 
 import klotio
 import klotio_flask_restful
 
 
-def app():
+def build():
+    """
+    Builds the Flask App
+    """
 
     app = flask.Flask("nandy-io-speech-api")
 
@@ -46,15 +47,25 @@ def app():
 
 
 class Group(klotio_flask_restful.Group):
+    """
+    Group class for this App
+    """
+
     APP = "speech.nandy.io"
 
 
 class Speak(flask_restful.Resource):
+    """
+    Speack endpoints
+    """
 
     name = "speak"
 
     @staticmethod
     def fields(values=None):
+        """
+        Creates fields for Speak form
+        """
 
         fields = opengui.Fields(values, fields=[
             {
@@ -119,6 +130,9 @@ class Speak(flask_restful.Resource):
 
     @klotio_flask_restful.logger
     def options(self):
+        """
+        OPTION endpoint that gives filds to build a dynamic form
+        """
 
         values = flask.request.json[self.name] if flask.request.json and self.name in flask.request.json else None
 
@@ -126,11 +140,14 @@ class Speak(flask_restful.Resource):
 
         if values and not fields.validate():
             return {"fields": fields.to_list(), "errors": fields.errors}
-        else:
-            return {"fields": fields.to_list()}
+
+        return {"fields": fields.to_list()}
 
     @klotio_flask_restful.logger
     def post(self):
+        """
+        POST endpoint to submit a speak event to the bus
+        """
 
         if not flask.request.json or self.name not in flask.request.json:
             return {"errors": ["missing %s" % self.name]}, 400
@@ -154,8 +171,14 @@ class Speak(flask_restful.Resource):
         return {"message": message}, 202
 
 class Integrate(flask_restful.Resource):
+    """
+    Integration endpoints
+    """
 
     @klotio_flask_restful.logger
-    def options(self):
+    def options(self): # pylint: disable=no-self-use
+        """
+        OPTIONS endpoint to add fields for speech
+        """
 
         return {"fields": Speak.fields().to_list()[1:]}
