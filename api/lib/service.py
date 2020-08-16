@@ -15,9 +15,6 @@ import opengui
 import klotio
 import klotio_flask_restful
 
-import klotio
-import klotio_flask_restful
-
 
 def build():
     """
