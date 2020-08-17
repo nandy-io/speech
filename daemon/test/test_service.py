@@ -142,9 +142,10 @@ class TestService(klotio_unittest.TestCase):
 
         self.assertLogged(self.daemon.logger, "info", "data", extra={
             "data": {
-                    "timestamp": 7,
-                    "text": "hey",
-                    "node": "noisy"
+                "timestamp": 7,
+                "text": "hey",
+                "node": "noisy"
+
             }
         })
 

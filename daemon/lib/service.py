@@ -6,14 +6,13 @@ import os
 import time
 
 import json
-import yaml
 import redis
 import gtts
-import patch
+import patch # pylint: disable=unused-import
 
 import klotio
 
-class Daemon(object):
+class Daemon:
     """
     Main class for daemon
     """
